@@ -4,6 +4,8 @@
 namespace App\DTO;
 
 
+use App\Entity\Person;
+
 class PersonDto
 {
     /** @var int */
@@ -17,6 +19,17 @@ class PersonDto
 
     /** @var string|null */
     public $filePath;
+
+    public static function mapFromEntity(Person $person): self
+    {
+        $personDto = new self();
+        $personDto->setIdPerson($person->getId());
+        $personDto->setName($person->getName());
+        $personDto->setSurname($person->getSurname());
+        $personDto->setFilePath($person->getFilePath());
+
+        return $personDto;
+    }
 
     /**
      * @param int $idPerson
