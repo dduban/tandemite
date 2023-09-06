@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\DTO\PersonDto;
 use App\Entity\Person;
 use App\Form\PersonDataFormType;
+use App\Repository\PersonRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -15,14 +17,32 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class PersonController extends AbstractController
 {
+    /** @var PersonRepository */
+    private $personRepository;
+
+    public function __construct(
+        PersonRepository $personRepository
+    )
+    {
+        $this->personRepository = $personRepository;
+    }
+
     /**
      * @Route("/list", name="person_list", methods={"GET"})
      */
-    public function listing(): JsonResponse
+    public function listing(): Response
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/PersonController.php',
+        $persons = $this->personRepository->findAll();
+
+        $personsDto = [];
+
+        foreach ($persons as $person) {
+            $personDto = PersonDto::mapFromEntity($person);
+            $personsDto[] = $personDto;
+        }
+
+        return $this->render('person-list.html.twig', [
+            'persons' => $personsDto,
         ]);
     }
 

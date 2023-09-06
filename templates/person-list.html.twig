@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista osób</title>
+</head>
+<body>
+<h1>Lista osób</h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Plik</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for person in persons %}
+        <tr>
+            <td>{{ person.idPerson }}</td>
+            <td>{{ person.name }}</td>
+            <td>{{ person.surname }}</td>
+            <td>{{ person.filePath }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
