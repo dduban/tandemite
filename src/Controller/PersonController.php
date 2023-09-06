@@ -16,9 +16,9 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 class PersonController extends AbstractController
 {
     /**
-     * @Route("/person", name="app_person")
+     * @Route("/list", name="person_list", methods={"GET"})
      */
-    public function formIndex(): JsonResponse
+    public function listing(): JsonResponse
     {
         return $this->json([
             'message' => 'Welcome to your new controller!',
@@ -27,7 +27,7 @@ class PersonController extends AbstractController
     }
 
     /**
-     * @Route("/person/new", name="formNew")
+     * @Route("/new", name="person_new", methods={"POST", "GET"})
      */
     public function new(Request $request, SluggerInterface $slugger): Response
     {
@@ -58,7 +58,7 @@ class PersonController extends AbstractController
 
             // ... persist the $product variable or any other work
 
-            return $this->redirectToRoute('app_person_list');
+            return $this->redirectToRoute('person_list');
         }
 
         return $this->render('person-form.html.twig', [
