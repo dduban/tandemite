@@ -18,17 +18,15 @@ class PersonDataFormType extends AbstractType
             ->add('surname')
             ->add('filePath', FileType::class, [
                 'label' => 'File',
-
-                'mapped' => false,
                 'required' => false,
-
                 'constraints' => [
                     new File([
                         'mimeTypes' => [
-                            'application/jpg',
-                            'application/jpeg',
-                            'application/png',
-                        ]
+                            'image/jpg',
+                            'image/jpeg',
+                            'image/png',
+                        ],
+                        'mimeTypesMessage' => 'Please upload a valid file',
                     ])
                 ],
             ]);

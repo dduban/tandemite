@@ -56,6 +56,7 @@ class PersonController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             /** @var UploadedFile $file */
             $file = $form->get('filePath')->getData();
 
@@ -70,13 +71,13 @@ class PersonController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
+                    dump('error');
                 }
 
                 $person->setFilePath($newFilename);
             }
 
-            // ... persist the $product variable or any other work
+            $this->personRepository->add($person, true);
 
             return $this->redirectToRoute('person_list');
         }
