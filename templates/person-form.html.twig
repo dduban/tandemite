@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formularz</title>
+</head>
+<body>
+<h1>Formularz</h1>
+<form method="POST" action="{{ path('formNew')}}">
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button type="submit">Wyślij</button>
+    {{ form_end(form) }}
+</form>
+</body>
+</html>
