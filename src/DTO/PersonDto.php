@@ -18,7 +18,7 @@ class PersonDto
     public $surname;
 
     /** @var string|null */
-    public $filePath;
+    public $fileUrl;
 
     public static function mapFromEntity(Person $person): self
     {
@@ -26,9 +26,18 @@ class PersonDto
         $personDto->setIdPerson($person->getId());
         $personDto->setName($person->getName());
         $personDto->setSurname($person->getSurname());
-        $personDto->setFilePath($person->getFilePath());
+        $personDto->fileUrl = $this->generateUrl('app_public_files', ['filename' => $person->getFilePath()]);
 
         return $personDto;
+    }
+
+    public function generateFileUrl(string $filesDirectory): ?string
+    {
+        if ($this->fileUrl) {
+            return sprintf('%s/%s', rtrim($filesDirectory, '/'), ltrim($this->fileUrl, '/'));
+        }
+
+        return null;
     }
 
     /**
@@ -86,20 +95,20 @@ class PersonDto
     }
 
     /**
-     * @param string|null $filePath
+     * @param string|null $fileUrl
      * @return PersonDto
      */
-    public function setFilePath(?string $filePath): PersonDto
+    public function setFileUrl(?string $fileUrl): PersonDto
     {
-        $this->filePath = $filePath;
+        $this->fileUrl = $fileUrl;
         return $this;
     }
 
     /**
      * @return string|null
      */
-    public function getFilePath(): ?string
+    public function getFileUrl(): ?string
     {
-        return $this->filePath;
+        return $this->fileUrl;
     }
 }

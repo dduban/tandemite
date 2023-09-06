@@ -20,7 +20,13 @@
             <td>{{ person.idPerson }}</td>
             <td>{{ person.name }}</td>
             <td>{{ person.surname }}</td>
-            <td>{{ person.filePath }}</td>
+            <td>
+                {% if person.fileUrl is not null %}
+                    <a href="{{ person.fileUrl }}" target="_blank">Otwórz</a>
+                {% else %}
+                    Brak pliku
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </tbody>

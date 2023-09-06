@@ -38,12 +38,39 @@ class PersonController extends AbstractController
 
         foreach ($persons as $person) {
             $personDto = PersonDto::mapFromEntity($person);
+            $personDto->fileUrl = $personDto->generateFileUrl($this->getParameter('files_directory'));
             $personsDto[] = $personDto;
         }
 
         return $this->render('person-list.html.twig', [
             'persons' => $personsDto,
         ]);
+    }
+
+    /**
+     * @Route("/uploads/files/{filename}", name="app_public_files")
+     */
+    public function show(string $filename): Response
+    {
+        $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/files/' . $filename;
+
+        if (!file_exists($filePath)) {
+            throw $this->createNotFoundException('Plik nie istnieje');
+        }
+
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+        ];
+
+        return new Response(
+            file_get_contents($filePath),
+            200,
+            [
+                'Content-Type' => $mimeTypes
+            ]
+        );
     }
 
     /**
