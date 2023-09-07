@@ -9,7 +9,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: login
+                property: username
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -17,6 +17,17 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+
+            pattern: ^/
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: /new
+                username_parameter: "login_form[username]"
+                password_parameter: "login_form[password]"
+            logout:
+                path: app_logout
+                target: /login
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
