@@ -7,18 +7,20 @@ use App\Entity\Person;
 use App\Form\PersonDataFormType;
 use App\Repository\PersonRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PersonController extends AbstractController
 {
-    /** @var PersonRepository */
-    private $personRepository;
+    private PersonRepository $personRepository;
 
     public function __construct(
         PersonRepository $personRepository
@@ -38,7 +40,7 @@ class PersonController extends AbstractController
 
         foreach ($persons as $person) {
             $personDto = PersonDto::mapFromEntity($person);
-            $personDto->fileUrl = $personDto->generateFileUrl($this->getParameter('files_directory'));
+            $personDto->fileUrl = $this->generateUrl('app_public_files', ['filename' => $person->getFilePath()]);
             $personsDto[] = $personDto;
         }
 
@@ -52,7 +54,8 @@ class PersonController extends AbstractController
      */
     public function show(string $filename): Response
     {
-        $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/files/' . $filename;
+        $imageDirectory = $this->getParameter('files_directory');
+        $filePath = $imageDirectory . "/" . $filename;
 
         if (!file_exists($filePath)) {
             throw $this->createNotFoundException('Plik nie istnieje');
@@ -64,28 +67,25 @@ class PersonController extends AbstractController
             'png' => 'image/png',
         ];
 
-        return new Response(
-            file_get_contents($filePath),
-            200,
-            [
-                'Content-Type' => $mimeTypes
-            ]
-        );
+        $response = new BinaryFileResponse(new File($filePath));
+        $response->headers->set('Content-Type', $mimeTypes);
+
+        return $response;
     }
 
     /**
-     * @Route("/new", name="person_new", methods={"POST", "GET"})
+     * @Route("/", name="person_new", methods={"POST", "GET"})
      */
-    public function new(Request $request, SluggerInterface $slugger): Response
+    public function new(Request $request, SluggerInterface $slugger, ValidatorInterface $validator): Response
     {
-        $person = new Person();
-        $form = $this->createForm(PersonDataFormType::class, $person);
+        $personDto = new PersonDto();
+        $form = $this->createForm(PersonDataFormType::class, $personDto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             /** @var UploadedFile $file */
-            $file = $form->get('filePath')->getData();
+            $file = $form->get('fileUrl')->getData();
 
             if ($file) {
                 $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -101,12 +101,25 @@ class PersonController extends AbstractController
                     dump('error');
                 }
 
-                $person->setFilePath($newFilename);
+                $personDto->setFileUrl($newFilename);
             }
+
+            $errors = $validator->validate($personDto);
+
+            if (count($errors) > 0) {
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error->getMessage();
+                }
+                $this->addFlash('error', 'Niepoprawne dane.');
+                $this->addFlash('error_code', Response::HTTP_BAD_REQUEST);
+            }
+
+            $person = PersonDto::mapToEntity($personDto);
 
             $this->personRepository->add($person, true);
 
-            return $this->redirectToRoute('person_list');
+            $this->addFlash('success', 'Pomyślnie utworzono.');
         }
 
         return $this->render('person-form.html.twig', [

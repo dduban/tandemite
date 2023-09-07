@@ -11,5 +11,24 @@
     <button type="submit">Wyślij</button>
     {{ form_end(form) }}
 </form>
+
+{# Komunikat o sukcesie #}
+{% if app.flashes('success') is defined and app.flashes('success')|length > 0 %}
+    <div class="alert alert-success">
+        {{ app.flashes('success')[0] }}
+    </div>
+{% endif %}
+
+{# Komunikat o błędzie #}
+{% if app.flashes('error') is defined and app.flashes('error')|length > 0 %}
+    <div class="alert alert-danger">
+        {{ app.flashes('error')[0] }}
+        {# Kod błędu HTTP #}
+        {% if app.flashes('error_code') is defined %}
+            {{ app.flashes('error_code')[0] }}
+        {% endif %}
+    </div>
+{% endif %}
+
 </body>
 </html>

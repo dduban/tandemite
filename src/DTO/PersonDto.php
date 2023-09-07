@@ -3,22 +3,30 @@
 
 namespace App\DTO;
 
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\Person;
 
 class PersonDto
 {
-    /** @var int */
-    public $idPerson;
+    public ?int $idPerson;
 
-    /** @var string */
-    public $name;
+    /**
+     * @Assert\Regex(
+     *     pattern="#^[a-zA-Z0-9\-.\/]*$#",
+     *     message="Name can only contain letters, numbers, -, ., and /"
+     * )
+     */
+    public string $name;
 
-    /** @var string|null */
-    public $surname;
+    /**
+     * @Assert\Regex(
+     *     pattern="#^[a-zA-Z0-9\-./]*$#",
+     *     message="Name can only contain letters, numbers, -, ., / and can be blank"
+     * )
+     */
+    public ?string $surname = null;
 
-    /** @var string|null */
-    public $fileUrl;
+    public ?string $fileUrl = null;
 
     public static function mapFromEntity(Person $person): self
     {
@@ -26,18 +34,19 @@ class PersonDto
         $personDto->setIdPerson($person->getId());
         $personDto->setName($person->getName());
         $personDto->setSurname($person->getSurname());
-        $personDto->fileUrl = $this->generateUrl('app_public_files', ['filename' => $person->getFilePath()]);
 
         return $personDto;
     }
 
-    public function generateFileUrl(string $filesDirectory): ?string
+    public static function mapToEntity(PersonDto $personDto): Person
     {
-        if ($this->fileUrl) {
-            return sprintf('%s/%s', rtrim($filesDirectory, '/'), ltrim($this->fileUrl, '/'));
+        $person = new Person();
+        $person->setName($personDto->getName());
+        if ($personDto->getSurname()) {
+            $person->setSurname($personDto->getSurname());
         }
 
-        return null;
+        return $person;
     }
 
     /**
