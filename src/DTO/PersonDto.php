@@ -45,6 +45,9 @@ class PersonDto
         if ($personDto->getSurname()) {
             $person->setSurname($personDto->getSurname());
         }
+        if ($personDto->getFileUrl()) {
+            $person->setFilePath($personDto->getFileUrl());
+        }
 
         return $person;
     }

@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\DTO\PersonDto;
-use App\Entity\Person;
 use App\Form\PersonDataFormType;
 use App\Repository\PersonRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,7 +39,9 @@ class PersonController extends AbstractController
 
         foreach ($persons as $person) {
             $personDto = PersonDto::mapFromEntity($person);
-            $personDto->fileUrl = $this->generateUrl('app_public_files', ['filename' => $person->getFilePath()]);
+            if ($person->getFilePath()) {
+                $personDto->fileUrl = $this->generateUrl('app_public_files', ['filename' => $person->getFilePath()]);
+            }
             $personsDto[] = $personDto;
         }
 
@@ -98,7 +99,7 @@ class PersonController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    dump('error');
+                    return new JsonResponse(['errors' => 'Nie udało się załadować pliku.'], Response::HTTP_BAD_REQUEST);
                 }
 
                 $personDto->setFileUrl($newFilename);
@@ -107,19 +108,14 @@ class PersonController extends AbstractController
             $errors = $validator->validate($personDto);
 
             if (count($errors) > 0) {
-                $errorMessages = [];
-                foreach ($errors as $error) {
-                    $errorMessages[] = $error->getMessage();
-                }
-                $this->addFlash('error', 'Niepoprawne dane.');
-                $this->addFlash('error_code', Response::HTTP_BAD_REQUEST);
+                $response = new JsonResponse(['errors' => 'Niepoprawne dane.'], Response::HTTP_BAD_REQUEST);
+            } else {
+                $person = PersonDto::mapToEntity($personDto);
+                $this->personRepository->add($person, true);
+                $response = new JsonResponse(['message' => 'Pomyślnie utworzono.'], Response::HTTP_CREATED);
             }
 
-            $person = PersonDto::mapToEntity($personDto);
-
-            $this->personRepository->add($person, true);
-
-            $this->addFlash('success', 'Pomyślnie utworzono.');
+            return $response;
         }
 
         return $this->render('person-form.html.twig', [

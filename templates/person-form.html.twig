@@ -5,30 +5,41 @@
 </head>
 <body>
 <h1>Formularz</h1>
-<form method="POST" action="{{ path('person_new')}}" enctype="multipart/form-data">
-    {{ form_start(form) }}
+<form id="person-form" method="POST" enctype="multipart/form-data" action="{{ path('person_new') }} ">
     {{ form_widget(form) }}
-    <button type="submit">Wyślij</button>
-    {{ form_end(form) }}
+    <button type="submit" id="submit-button">Wyślij</button>
 </form>
 
-{# Komunikat o sukcesie #}
-{% if app.flashes('success') is defined and app.flashes('success')|length > 0 %}
-    <div class="alert alert-success">
-        {{ app.flashes('success')[0] }}
-    </div>
-{% endif %}
+<div id="form-messages"></div>
+<div>
+    <a href="{{ path('person_list') }}">Przejdź do listy osób</a>
+</div>
 
-{# Komunikat o błędzie #}
-{% if app.flashes('error') is defined and app.flashes('error')|length > 0 %}
-    <div class="alert alert-danger">
-        {{ app.flashes('error')[0] }}
-        {# Kod błędu HTTP #}
-        {% if app.flashes('error_code') is defined %}
-            {{ app.flashes('error_code')[0] }}
-        {% endif %}
-    </div>
-{% endif %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#person-form').submit(function (event) {
+            event.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#form-messages').html('<div class="alert alert-success">Pomyślnie utworzono.</div>');
+                },
+                error: function (xhr) {
+                    $('#form-messages').html('<div class="alert alert-danger">Niepoprawne dane.</div>');
+                    $('#form-messages').append('<div class="alert alert-danger">Kod błędu: ' + xhr.status + '</div>');
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

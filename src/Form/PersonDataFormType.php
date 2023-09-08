@@ -18,13 +18,17 @@ class PersonDataFormType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
+                'label' => 'Imię',
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Pole "Name" nie może być puste.',
                     ]),
                 ]
             ])
-            ->add('surname', TextType::class)
+            ->add('surname', TextType::class, [
+                'label' => 'Nazwisko',
+                'required' => false
+            ])
             ->add('fileUrl', FileType::class, [
                 'label' => 'File',
                 'required' => false,
