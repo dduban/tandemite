@@ -98,7 +98,7 @@ class PersonController extends AbstractController
                         $this->getParameter('files_directory'),
                         $newFilename
                     );
-                } catch (FileException $e) {
+                } catch (\Exception $e) {
                     return new JsonResponse(['errors' => 'Nie udało się załadować pliku.'], Response::HTTP_BAD_REQUEST);
                 }
 
@@ -116,6 +116,9 @@ class PersonController extends AbstractController
             }
 
             return $response;
+        }
+        else if ($form->isSubmitted() && !$form->isValid()) {
+            return new JsonResponse(['errors' => 'Niepoprawne dane.'], Response::HTTP_BAD_REQUEST);
         }
 
         return $this->render('person-form.html.twig', [
